@@ -1,0 +1,12 @@
+# syntax=docker/dockerfile:1
+FROM golang:1.23 AS builder
+WORKDIR /src
+
+# Copy full repo context (including local replace: ./openapi)
+COPY . .
+
+# Build statically linked provider binary
+RUN CGO_ENABLED=0 go build -buildvcs=false -o /out/terraform-provider-contabo .
+
+FROM scratch AS export
+COPY --from=builder /out/terraform-provider-contabo /terraform-provider-contabo
